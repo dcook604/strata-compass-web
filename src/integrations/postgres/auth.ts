@@ -1,15 +1,21 @@
-import { sql } from './client';
-
 export const checkAdminLogin = async (email: string, password: string): Promise<string | null> => {
   try {
-    const [user] = await sql`
-      SELECT id FROM admin_users 
-      WHERE email = ${email} AND password = ${password}
-    `;
-    
-    return user?.id || null;
+    const response = await fetch('http://localhost:3001/api/auth', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const { userId } = await response.json();
+    return userId || null;
   } catch (error) {
-    console.error('PostgreSQL auth error:', error);
+    console.error('Authentication error:', error);
     throw error;
   }
 };
