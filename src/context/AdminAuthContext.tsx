@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { checkAdminLogin } from '@/integrations/postgres/auth';
 
 type AdminUser = {
   id: string;
@@ -39,24 +39,15 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
     try {
       console.log('Attempting login with:', email);
       
-      // Call the RPC function to verify admin credentials
-      const { data, error } = await supabase.rpc('check_admin_login', {
-        email_input: email,
-        password_input: password,
-      });
+      // Call PostgreSQL auth function
+      const userId = await checkAdminLogin(email, password);
       
-      console.log('Login RPC response:', { data, error });
+      console.log('Login response:', { userId });
 
-      if (error) {
-        console.error('Login RPC error:', error);
-        setIsLoading(false);
-        return { error: error.message };
-      }
-
-      if (data) {
-        // Data will be the user ID if successful
-        console.log('Login successful, user ID:', data);
-        const adminUser = { id: data, email };
+      if (userId) {
+        // userId will be the user ID if successful
+        console.log('Login successful, user ID:', userId);
+        const adminUser = { id: userId, email };
         setAdminUser(adminUser);
         localStorage.setItem('admin_user', JSON.stringify(adminUser));
         setIsLoading(false);
