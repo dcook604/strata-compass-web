@@ -1,4 +1,4 @@
-import postgres from 'postgres';
+import * as postgres from 'postgres';
 
 // Only create client if running in Node.js environment
 export const sql = typeof window === 'undefined'
