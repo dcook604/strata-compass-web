@@ -1,4 +1,4 @@
-import { sql } from '../integrations/postgres/client';
+import { pool } from '../integrations/postgres/client';
 import { logger } from './config';
 
 async function createAdmin(email: string, password: string) {

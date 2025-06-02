@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
 type AdminUser = {
   id: string;
@@ -37,7 +37,7 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/auth`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
