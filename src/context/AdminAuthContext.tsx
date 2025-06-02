@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { checkAdminLogin } from '@/integrations/postgres/auth';
+const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3001/api';
 
 type AdminUser = {
   id: string;
@@ -37,26 +37,26 @@ export function AdminAuthProvider({ children }: { children: React.ReactNode }) {
   const login = async (email: string, password: string) => {
     setIsLoading(true);
     try {
-      console.log('Attempting login with:', email);
-      
-      // Call PostgreSQL auth function
-      const userId = await checkAdminLogin(email, password);
-      
-      console.log('Login response:', { userId });
+      const response = await fetch(`${API_BASE_URL}/auth`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-      if (userId) {
-        // userId will be the user ID if successful
-        console.log('Login successful, user ID:', userId);
-        const adminUser = { id: userId, email };
-        setAdminUser(adminUser);
-        localStorage.setItem('admin_user', JSON.stringify(adminUser));
+      if (!response.ok) {
+        const errorData = await response.json();
         setIsLoading(false);
-        return { error: null };
-      } else {
-        console.log('Invalid credentials: No user ID returned');
-        setIsLoading(false);
-        return { error: 'Invalid credentials' };
+        return { error: errorData.error || 'Login failed' };
       }
+
+      const { userId } = await response.json();
+      const adminUser = { id: userId, email };
+      setAdminUser(adminUser);
+      localStorage.setItem('admin_user', JSON.stringify(adminUser));
+      setIsLoading(false);
+      return { error: null };
     } catch (error: any) {
       console.error('Admin login error:', error);
       setIsLoading(false);
